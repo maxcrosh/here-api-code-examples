@@ -1,0 +1,113 @@
+<div>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-places.js"></script>
+
+	<!-- Полючаем файлы css и js  -->
+	<link rel="stylesheet" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css" type="text/css" />
+
+	<style type="text/css">
+		#map{
+			width: 600px;
+			height: 100px;
+		}
+	</style>
+
+	<div id="map"></div>
+
+	<script type="text/javascript">
+		
+		// инициализируем платформу с ID и Кодом приложения 
+		var platform = new H.service.Platform({
+		  app_id: 'YOUR_APP_ID',
+		  app_code: 'YOUR_APP_CODE',
+		  useCIT: true,
+		  useHTTPS: true
+		});
+
+		// Получаем спислк картографических основ (спутник, вектор)
+		var defaultLayers = platform.createDefaultLayers({lg:"RUS"});
+
+		/* Инициализируем объект карты с аргументами: 
+				контейнер где необходимо отобразить карту, 
+				тип базовой карты,
+				опции
+		*/
+		var map = new H.Map(document.getElementById('map'),
+		  defaultLayers.normal.map,{
+		  	center:{
+		  		"lat":47.21623,
+		  		"lng":39.63069
+		  	},
+		  	zoom:17
+		  });
+
+		var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+		// Создаем стаедартный пользовательский интерфейс
+		var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+		// Изменение размера карты в зависимости от изменения размеров окна
+		window.addEventListener('resize',function(){
+			map.getViewPort().resize()
+		});
+
+
+		var explore = new H.places.Explore(platform.getPlacesService());
+
+		let markerGroup = new H.map.Group();
+		map.addObject(markerGroup);
+
+		map.addEventListener('tap', (e) => {
+
+		  markerGroup.removeObjects(markerGroup.getObjects());
+		  
+		  let coords = map.screenToGeo(e.currentPointer.viewportX, e.currentPointer.viewportY);
+		  
+		  let marker = new H.map.Marker(new H.geo.Point(coords.lat, coords.lng),{
+		    content:"Местоположение"
+		  });
+
+		  markerGroup.addObject(marker);
+		  
+		  var params = {
+		    'in': coords.lat + "," + coords.lng +";"+"r=1000",
+		    'cat':"eat-drink"
+		  };
+
+
+		  explore.request(params,{},(data) =>{
+		  
+		    data.results.items.forEach((point)=>{
+		 
+		      var POI = new H.map.Marker({lat:point.position[0],lng:point.position[1]},{icon:new H.map.Icon(point.icon)});
+		      POI.setData({
+		        "data":point.title
+		      });
+
+		      var bubble;
+
+		      POI.addEventListener('pointerenter',function(e){
+
+		        bubble =  new H.ui.InfoBubble(e.target.getPosition(), {
+		          content: e.target.getData().data
+		        });
+		      
+		        ui.addBubble(bubble);
+
+		      });    
+
+		      POI.addEventListener('pointerleave',function(e){
+		        ui.removeBubble(bubble);
+		      }); 
+
+		      markerGroup.addObject(POI);
+		    })
+
+		  },(error) =>{console.log(error)})
+
+		})
+	</script>
+</div>
