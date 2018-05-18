@@ -1,7 +1,7 @@
 // инициализируем платформу с ID и Кодом приложения 
 var platform = new H.service.Platform({
-  app_id: 'TBDjSb7P7zIirbfww4jT',
-  app_code: 'TysyptsFjJv-ceJwXGoYmw',
+  app_id: 'YOUR APP ID',
+  app_code: 'YOUR APP CODE',
   useCIT: true,
   useHTTPS: true
 });
