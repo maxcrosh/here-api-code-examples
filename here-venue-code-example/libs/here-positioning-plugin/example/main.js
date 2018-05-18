@@ -1,8 +1,8 @@
 
 // инициализируем платформу с ID и Кодом приложения 
 var platform = new H.service.Platform({
-  app_id: 'YOUR_APP_ID',
-  app_code: 'YOUR_APP_CODE',
+  app_id: 'YOUR APP ID',
+  app_code: 'YOUR APP CODE',
   useCIT: true,
   useHTTPS: true
 });
@@ -17,12 +17,12 @@ var defaultLayers = platform.createDefaultLayers({lg:"RUS"});
 */
 var map = new H.Map(document.getElementById('map'),
   defaultLayers.normal.map,{
-    center:{
-      "lat":47.21623,
-      "lng":39.63069
-    },
-    zoom:17,
-    autoColor:false
+  	center:{
+  		"lat":47.21623,
+  		"lng":39.63069
+  	},
+  	zoom:17,
+    noWrap:true,
   });
 
 var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
@@ -35,16 +35,8 @@ window.addEventListener('resize',function(){
 	map.getViewPort().resize()
 });
 
-
-var reader = new H.data.geojson.Reader();
-
-reader.parseData(layer);
-
-var group = new H.map.Group(); 
-group.addObjects(reader.getParsedObjects()); 
-map.addObject(group); 
-
-group.addEventListener('tap', (ev) => {alert(ev.target.getData().properties.name)}); 
+var control = new GeolocationControl('right-middle');
+ui.addControl('control', control);
 
 
 
